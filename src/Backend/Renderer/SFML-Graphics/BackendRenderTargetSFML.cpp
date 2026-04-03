@@ -174,7 +174,7 @@ namespace tgui
 
         if (indices)
         {
-            auto verticesSFML = MakeUniqueForOverwrite<Vertex[]>(indexCount);
+            std::vector<Vertex> verticesSFML(indexCount);
             for (std::size_t i = 0; i < indexCount; ++i)
             {
 #if SFML_VERSION_MAJOR >= 3
@@ -191,20 +191,26 @@ namespace tgui
 #endif
             }
 
-            sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
-            vertexBuffer.create(indexCount);
-            vertexBuffer.update(reinterpret_cast<const sf::Vertex*>(verticesSFML.get()));
-
-            m_target->draw(vertexBuffer, convertRenderStates(states, texture));
+            m_target->drawVertices(
+                {
+                    .primitiveType = sf::PrimitiveType::Triangles,
+                    .vertexCount = verticesSFML.size(),
+                    .vertexData = reinterpret_cast<const sf::Vertex*>(verticesSFML.data()),
+                    .renderStates = convertRenderStates(states, texture)
+                }
+                );
         }
         else // There are no indices
         {
 #if SFML_VERSION_MAJOR >= 3
-            sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
-            vertexBuffer.create(vertexCount);
-            vertexBuffer.update(reinterpret_cast<const sf::Vertex*>(vertices));
-
-            m_target->draw(vertexBuffer, convertRenderStates(states, texture));
+            m_target->drawVertices(
+                {
+                    .primitiveType = sf::PrimitiveType::Triangles,
+                    .vertexCount = vertexCount,
+                    .vertexData = reinterpret_cast<const sf::Vertex*>(vertices),
+                    .renderStates = convertRenderStates(states, texture)
+                }
+            );
 #else
             auto verticesSFML = std::vector<Vertex>(vertices, vertices + vertexCount);
             for (std::size_t i = 0; i < vertexCount; ++i)

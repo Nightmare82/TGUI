@@ -253,20 +253,17 @@ namespace tgui
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void CanvasSFML::draw(const sf::RenderTexture& drawable, const sf::RenderStates& states)
-    {
-        m_renderTexture->draw(drawable.getTexture(), states);
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     void CanvasSFML::draw(const sf::Vertex* vertices, std::size_t vertexCount, sf::PrimitiveType type, const sf::RenderStates& states)
     {
-        sf::VertexBuffer vertexBuffer(type);
-        vertexBuffer.create(vertexCount);
-        vertexBuffer.update(vertices);
+        m_renderTexture->drawVertices(
+            {
+                .primitiveType = type,
+                .renderStates = states,
+                .vertexCount = vertexCount,
+                .vertexData = vertices
+            }
 
-        m_renderTexture->draw(vertexBuffer, states);
+        );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

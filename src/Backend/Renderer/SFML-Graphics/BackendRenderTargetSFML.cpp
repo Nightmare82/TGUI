@@ -145,10 +145,15 @@ namespace tgui
 
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");
         const auto* sfmlVertices = reinterpret_cast<const sf::Vertex*>(triangleVertices.get());
-        sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
-        vertexBuffer.create(indices.size());
-        vertexBuffer.update(sfmlVertices);
-        m_target->draw(vertexBuffer, sfStates);
+
+        m_target->drawVertices(
+            {
+                .vertexCount = vertices.size(),
+                .vertexData = sfmlVertices,
+                .primitiveType = sf::PrimitiveType::Triangles,
+                .renderStates = sfStates,
+            }
+        );
 
         if (clippingRequired)
             removeClippingLayer();

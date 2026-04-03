@@ -262,7 +262,6 @@ namespace tgui
                 .vertexCount = vertexCount,
                 .vertexData = vertices
             }
-
         );
     }
 
@@ -290,7 +289,7 @@ namespace tgui
         statesSFML.texture = std::static_pointer_cast<BackendTextureSFML>(sprite.getTexture().getData()->backendTexture)->getInternalTexture();
 
 #if SFML_VERSION_MAJOR >= 3
-        //statesSFML.coordinateType = sf::CoordinateType::Normalized;
+        //statesSFML.coordinateType = sf::CoordinateType::Normaliz3ed;
 #else
         const sf::Vector2u textureSize{statesSFML.texture->getSize()};
 #endif
@@ -309,10 +308,15 @@ namespace tgui
 
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");
         const auto* sfmlVertices = reinterpret_cast<const sf::Vertex*>(triangleVertices.get());
-        sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
-        vertexBuffer.create(indices.size());
-        vertexBuffer.update(sfmlVertices);
-        m_renderTexture->draw(vertexBuffer, statesSFML);
+
+        m_renderTexture->drawVertices(
+            {
+                .primitiveType = sf::PrimitiveType::Triangles,
+                .renderStates = statesSFML,
+                .vertexCount = vertices.size(),
+                .vertexData = sfmlVertices
+            }
+        );
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,11 +370,15 @@ namespace tgui
             {{textureSize.x, textureSize.y}, vertexColorSFML, {1, 1}},
         }};
 
-        sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
-        vertexBuffer.create(verticesSFML.size());
-        vertexBuffer.update(verticesSFML.data());
+        static_cast<BackendRenderTargetSFML&>(target).getTarget()->drawVertices(
+            {
+                .primitiveType = sf::PrimitiveType::Triangles,
+                .renderStates = statesSFML,
+                .vertexCount = verticesSFML.size(),
+                .vertexData = verticesSFML.data()
+            }
+            );
 
-        static_cast<BackendRenderTargetSFML&>(target).getTarget()->draw(vertexBuffer, statesSFML);
 #else
         // We use textureSize instead of size for the vertices coordinates to keep rendering stable when the size is changing and
         // the width and height aren't integer values.

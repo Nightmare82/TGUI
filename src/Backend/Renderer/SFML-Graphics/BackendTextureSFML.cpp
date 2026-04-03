@@ -43,11 +43,12 @@ namespace tgui
 
         if (!m_texture || (Vector2u{m_texture->getSize()} != size))
         {
+
+            sf::TextureCreateSettings settings{};
+            m_texture = sf::Texture::create({size.x, size.y}, settings);
             if (!m_texture)
-                m_texture = std::make_unique<sf::Texture>();
-#if SFML_VERSION_MAJOR >= 3
-            if (!m_texture->resize({size.x, size.y}))
                 return false;
+#if SFML_VERSION_MAJOR >= 3
 #else
             if (!m_texture->create(size.x, size.y))
                 return false;
@@ -77,21 +78,21 @@ namespace tgui
 
     sf::Texture* BackendTextureSFML::getInternalTexture()
     {
-        return m_texture.get();
+        return m_texture.asPtr();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const sf::Texture* BackendTextureSFML::getInternalTexture() const
     {
-        return m_texture.get();
+        return m_texture.asPtr();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void BackendTextureSFML::replaceInternalTexture(const sf::Texture& texture)
     {
-        m_texture = std::make_unique<sf::Texture>(texture);
+        m_texture.emplace(texture);
 
         m_pixels = nullptr;
         m_imageSize = {texture.getSize().x, texture.getSize().y};

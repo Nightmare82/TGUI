@@ -70,20 +70,16 @@ namespace tgui
     public:
         BackendWindowSFML(unsigned int width, unsigned int height, const String& title)
         {
-            sf::ContextSettings settings;
+            sf::RenderWindow::Settings settings{ .size = {width, height}, .title = title, .fullscreen = false, .resizable = true };
+            
 #if !TGUI_HAS_BACKEND_SFML_GRAPHICS
             settings.majorVersion = 3;
             settings.minorVersion = 3;
             settings.attributeFlags = sf::ContextSettings::Attribute::Core;
 #endif
+            m_window = std::make_unique<sf::RenderWindow>(sf::RenderWindow::create(settings).value());
 
-#if SFML_VERSION_MAJOR >= 3
-            m_window.create(sf::VideoMode{{width, height}}, title.toStdString(), sf::Style::Default, sf::State::Windowed, settings);
-#else
-            m_window.create(sf::VideoMode{width, height}, title.toStdString(), sf::Style::Default, settings);
-#endif
-
-            m_gui = std::make_unique<Gui>(m_window);
+            m_gui = std::make_unique<Gui>(*m_window);
             m_gui->getBackendRenderTarget()->setClearColor({200, 200, 200});
         }
 
@@ -103,18 +99,23 @@ namespace tgui
 
         bool isOpen() const override
         {
-            return m_window.isOpen();
+            return (m_window != nullptr);
         }
 
         void close() override
         {
-            m_window.close();
+            m_window = nullptr;
         }
 
         bool pollEvent(Event& event) override
         {
+            if (m_window == nullptr)
+            {
+                return false;
+            }
+
 #if SFML_VERSION_MAJOR >= 3
-            while (const auto eventSFML = m_window.pollEvent())
+            while (const auto eventSFML = m_window->pollEvent())
             {
                 if (m_gui->convertEvent(*eventSFML, event))
                     return true;
@@ -123,7 +124,7 @@ namespace tgui
             return false; // No new events
 #else
             sf::Event eventSFML;
-            while (m_window.pollEvent(eventSFML))
+            while (m_window->pollEvent(eventSFML))
             {
                 if (m_gui->convertEvent(eventSFML, event))
                     return true;
@@ -137,7 +138,10 @@ namespace tgui
         {
             m_gui->getBackendRenderTarget()->clearScreen();
             m_gui->draw();
-            m_window.display();
+            if (m_window)
+            {
+                m_window->display();
+            }
         }
 
         void mainLoop(Color clearColor) override
@@ -151,15 +155,15 @@ namespace tgui
             auto pixelPtr = ImageLoader::loadFromFile((getResourcePath() / filename).asString(), iconSize);
             if (pixelPtr)
 #if SFML_VERSION_MAJOR >= 3
-                m_window.setIcon({iconSize.x, iconSize.y}, pixelPtr.get());
+                m_window->setIcon({iconSize.x, iconSize.y}, pixelPtr.get());
 #else
-                m_window.setIcon(iconSize.x, iconSize.y, pixelPtr.get());
+                m_window->setIcon(iconSize.x, iconSize.y, pixelPtr.get());
 #endif
         }
 
     private:
 #if TGUI_HAS_BACKEND_SFML_GRAPHICS
-        sf::RenderWindow m_window;
+        std::unique_ptr<sf::RenderWindow> m_window;
 #else
         sf::Window m_window;
 #endif

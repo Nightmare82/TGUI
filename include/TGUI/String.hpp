@@ -39,10 +39,6 @@
 #include <type_traits>
 #include <initializer_list>
 
-#if TGUI_HAS_WINDOW_BACKEND_SFML
-    #include <SFML/System/String.hpp>
-#endif
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace tgui
@@ -432,23 +428,6 @@ namespace tgui
         explicit String(StringViewImpl<CharType> stringView, std::size_t pos, std::size_t count) :
             String(stringView.data() + pos, count)
         {
-        }
-#endif
-
-#if TGUI_HAS_WINDOW_BACKEND_SFML
-        // This constructor has to be explicit or it will cause MSVC to no longer compile code that performs sf::String + std::string
-        explicit String(const sf::String& str)
-    #if SFML_VERSION_MAJOR >= 3
-            : m_string{str.toUtf32()}
-    #else
-            : m_string{reinterpret_cast<const char32_t*>(str.toUtf32().c_str())}
-    #endif
-        {
-        }
-
-        explicit operator sf::String() const
-        {
-            return sf::String::fromUtf32(m_string.cbegin(), m_string.cend());
         }
 #endif
 

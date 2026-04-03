@@ -28,7 +28,7 @@
 #include <TGUI/Vector2.hpp>
 
 #if TGUI_HAS_RENDERER_BACKEND_SFML_GRAPHICS && !TGUI_DISABLE_SFML_CONVERSIONS
-    #include <SFML/Graphics/Rect.hpp>
+    #include <SFML/System/Rect2.hpp>
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ namespace tgui
         ///
         /// @param rect  Rectangle to initialize
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        explicit constexpr Rect(sf::Rect<T> rect) :
+        explicit constexpr Rect(sf::Rect2<T> rect) :
             left  {rect.left},
             top   {rect.top},
             width {rect.width},
@@ -152,9 +152,9 @@ namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @brief Converts the Rect to an sf::Rect
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        explicit operator sf::Rect<T>() const
+        explicit operator sf::Rect2<T>() const
         {
-            return sf::Rect<T>{left, top, width, height};
+            return sf::Rect2<T>{left, top, width, height};
         }
 #endif
 

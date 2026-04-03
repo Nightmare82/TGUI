@@ -27,6 +27,7 @@
 
 #include <SFML/Config.hpp>
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Glyph.hpp>
 #include <cmath>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,10 +42,18 @@ namespace tgui
         m_textureVersions.clear();
 
         m_fileContents = std::move(data);
-        m_font = std::make_unique<sf::Font>();
+
 #if SFML_VERSION_MAJOR >= 3
-        return m_font->openFromMemory(m_fileContents.get(), sizeInBytes);
+        auto loadedFont = sf::Font::openFromMemory(m_fileContents.get(), sizeInBytes);
+        if (!loadedFont)
+        {
+            return false;
+        }
+
+        m_font = std::make_unique<sf::Font>(std::move(loadedFont.value()));
+        return true;
 #else
+        m_font = std::make_unique<sf::Font>();
         return m_font->loadFromMemory(m_fileContents.get(), sizeInBytes);
 #endif
     }
@@ -165,7 +174,13 @@ namespace tgui
             return 0;
 
 #if (SFML_VERSION_MAJOR > 3) || (SFML_VERSION_MAJOR == 3 && SFML_VERSION_MINOR >= 1)
-        return std::ceil(m_font->getAscent(characterSize));
+        if (!m_font->hasGlyph(U'\u00CA'))
+        {
+            const auto scaledTextSize = static_cast<unsigned int>(characterSize * m_fontScale);
+            return static_cast<float>(scaledTextSize) / m_fontScale;
+        }
+
+        return getGlyph(U'\u00CA', characterSize, false, 0).bounds.height;
 #elif (SFML_VERSION_MAJOR > 2) || (SFML_VERSION_MINOR >= 6)
         // SFML didn't provide a method to access the ascent of the font prior to SFML 3.1.
         // If the font contains a capital e-circumflex glyph then we use its size as our ascent value.
@@ -196,7 +211,9 @@ namespace tgui
     float BackendFontSFML::getDescent(unsigned int characterSize)
     {
 #if (SFML_VERSION_MAJOR > 3) || (SFML_VERSION_MAJOR == 3 && SFML_VERSION_MINOR >= 1)
-        return std::ceil(m_font->getDescent(characterSize));
+        const FontGlyph& glyphG = getGlyph(U'g', characterSize, false);
+        const FontGlyph& glyphUnderscore = getGlyph(U'_', characterSize, false);
+        return std::min(-glyphG.bounds.height - glyphG.bounds.top, -glyphUnderscore.bounds.height - glyphUnderscore.bounds.top);
 #else
         // SFML didn't provide a method to access the descent of the font prior to SFML 3.1.
         // We extract the descent by examining the 'g' and '_' glyphs, assuming it exists.
@@ -246,7 +263,8 @@ namespace tgui
         auto texture = getBackend()->getRenderer()->createTexture();
         if (m_font)
         {
-            const sf::Image& image = m_font->getTexture(scaledTextSize).copyToImage();
+            //const sf::Image& image = m_font->getTexture(scaledTextSize).copyToImage();
+            const sf::Image& image = m_font->getTexture().copyToImage();
             texture->loadTextureOnly({image.getSize().x, image.getSize().y}, image.getPixelsPtr(), m_isSmooth);
         }
         m_textures[scaledTextSize] = texture;
@@ -264,7 +282,8 @@ namespace tgui
             return {0, 0};
 
         const auto scaledTextSize = static_cast<unsigned int>(characterSize * m_fontScale);
-        const auto size = m_font->getTexture(scaledTextSize).getSize();
+        //const auto size = m_font->getTexture(scaledTextSize).getSize();
+        const auto size = m_font->getTexture().getSize();
         return {size.x, size.y};
     }
 

@@ -28,6 +28,8 @@
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/View.hpp>
+#include <SFML/Graphics/VertexBuffer.hpp>
 
 #include <cmath>
 #include <array>
@@ -143,7 +145,10 @@ namespace tgui
 
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");
         const auto* sfmlVertices = reinterpret_cast<const sf::Vertex*>(triangleVertices.get());
-        m_target->draw(sfmlVertices, indices.size(), sf::PrimitiveType::Triangles, sfStates);
+        sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
+        vertexBuffer.create(indices.size());
+        vertexBuffer.update(sfmlVertices);
+        m_target->draw(vertexBuffer, sfStates);
 
         if (clippingRequired)
             removeClippingLayer();
@@ -181,12 +186,20 @@ namespace tgui
 #endif
             }
 
-            m_target->draw(reinterpret_cast<const sf::Vertex*>(verticesSFML.get()), indexCount, sf::PrimitiveType::Triangles, convertRenderStates(states, texture));
+            sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
+            vertexBuffer.create(indexCount);
+            vertexBuffer.update(reinterpret_cast<const sf::Vertex*>(verticesSFML.get()));
+
+            m_target->draw(vertexBuffer, convertRenderStates(states, texture));
         }
         else // There are no indices
         {
 #if SFML_VERSION_MAJOR >= 3
-            m_target->draw(reinterpret_cast<const sf::Vertex*>(vertices), vertexCount, sf::PrimitiveType::Triangles, convertRenderStates(states, texture));
+            sf::VertexBuffer vertexBuffer(sf::PrimitiveType::Triangles);
+            vertexBuffer.create(vertexCount);
+            vertexBuffer.update(reinterpret_cast<const sf::Vertex*>(vertices));
+
+            m_target->draw(vertexBuffer, convertRenderStates(states, texture));
 #else
             auto verticesSFML = std::vector<Vertex>(vertices, vertices + vertexCount);
             for (std::size_t i = 0; i < vertexCount; ++i)
@@ -209,18 +222,18 @@ namespace tgui
             m_pixelsPerPoint = {clipViewport.width / clipRect.width, clipViewport.height / clipRect.height};
 
             // Rounding clipRect to pixel coordinates is needed to avoid blurry text
-            sf::View newView{{{std::round(clipRect.left * m_pixelsPerPoint.x) / m_pixelsPerPoint.x, std::round(clipRect.top * m_pixelsPerPoint.y) / m_pixelsPerPoint.y},
-                              {std::round(clipRect.width * m_pixelsPerPoint.x) / m_pixelsPerPoint.x, std::round(clipRect.height * m_pixelsPerPoint.y) / m_pixelsPerPoint.y}}};
-            newView.setViewport({{clipViewport.left / m_targetSize.x, clipViewport.top / m_targetSize.y},
-                                 {clipViewport.width / m_targetSize.x, clipViewport.height / m_targetSize.y}});
+            sf::View newView{{std::round(clipRect.left * m_pixelsPerPoint.x) / m_pixelsPerPoint.x, std::round(clipRect.top * m_pixelsPerPoint.y) / m_pixelsPerPoint.y},
+                              {std::round(clipRect.width * m_pixelsPerPoint.x) / m_pixelsPerPoint.x, std::round(clipRect.height * m_pixelsPerPoint.y) / m_pixelsPerPoint.y}};
+            newView.viewport = {{clipViewport.left / m_targetSize.x, clipViewport.top / m_targetSize.y},
+                                 {clipViewport.width / m_targetSize.x, clipViewport.height / m_targetSize.y}};
             m_target->setView(newView);
         }
         else // Clip the entire window
         {
             m_pixelsPerPoint = {1, 1};
 
-            sf::View clippingView{{{0, 0}, {0, 0}}};
-            clippingView.setViewport({{0, 0}, {0, 0}});
+            sf::View clippingView{{0, 0}, {0, 0}};
+            clippingView.viewport = {{0, 0}, {0, 0}};
             m_target->setView(clippingView);
         }
     }
@@ -232,13 +245,15 @@ namespace tgui
         const std::array<float, 16>& transformMatrix = states.transform.getMatrix();
 
         sf::RenderStates statesSFML;
-        statesSFML.transform = sf::Transform(
-            transformMatrix[0], transformMatrix[4], transformMatrix[12],
-            transformMatrix[1], transformMatrix[5], transformMatrix[13],
-            transformMatrix[3], transformMatrix[7], transformMatrix[15]);
+        statesSFML.transform = sf::Transform{
+                transformMatrix[0], transformMatrix[4], transformMatrix[12],
+                transformMatrix[1], transformMatrix[5], transformMatrix[13]
+            };
+
+
 
 #if SFML_VERSION_MAJOR >= 3
-        statesSFML.coordinateType = sf::CoordinateType::Normalized;
+        //statesSFML.coordinateType = sf::CoordinateType::Normalized;
 #endif
 
         if (texture)

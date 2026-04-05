@@ -233,9 +233,9 @@ namespace tgui
         /// @param drawable Object to draw
         /// @param states   Render states to use for drawing
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        void draw(const sf::RenderTexture& drawable, const sf::RenderStates& states = {})
+        void draw(const auto& drawable, const sf::RenderStates& states = {})
         {
-            m_renderTexture->draw(drawable.getTexture(), states);
+            m_renderTexture->draw(drawable, states);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

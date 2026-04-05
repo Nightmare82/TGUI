@@ -174,13 +174,7 @@ namespace tgui
             return 0;
 
 #if (SFML_VERSION_MAJOR > 3) || (SFML_VERSION_MAJOR == 3 && SFML_VERSION_MINOR >= 1)
-        if (!m_font->hasGlyph(U'\u00CA'))
-        {
-            const auto scaledTextSize = static_cast<unsigned int>(characterSize * m_fontScale);
-            return static_cast<float>(scaledTextSize) / m_fontScale;
-        }
-
-        return getGlyph(U'\u00CA', characterSize, false, 0).bounds.height;
+        return std::ceil(m_font->getAscent(characterSize));
 #elif (SFML_VERSION_MAJOR > 2) || (SFML_VERSION_MINOR >= 6)
         // SFML didn't provide a method to access the ascent of the font prior to SFML 3.1.
         // If the font contains a capital e-circumflex glyph then we use its size as our ascent value.

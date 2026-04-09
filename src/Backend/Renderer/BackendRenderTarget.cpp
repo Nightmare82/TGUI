@@ -26,6 +26,8 @@
 #include <TGUI/Backend/Renderer/BackendText.hpp>
 #include <TGUI/Widget.hpp>
 
+#include <SFML/Graphics/RectangleShapeData.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -324,6 +326,8 @@ namespace tgui
     {
         if (!sprite.isSet())
             return;
+
+
 
         RenderStates transformedStates = states;
         if (sprite.getRotation() != 0)

@@ -34,7 +34,7 @@
 #include <TGUI/Backend/Renderer/SFML-Graphics/BackendRendererSFML.hpp>
 #include <TGUI/Backend/Font/SFML-Graphics/BackendFontSFML.hpp>
 
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 #ifdef TGUI_SYSTEM_IOS
   #include <SFML/Main.hpp>

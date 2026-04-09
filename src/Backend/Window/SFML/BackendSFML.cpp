@@ -30,6 +30,7 @@
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Clipboard.hpp>
+#include <SFML/Window/Cursor.hpp>
 
 #if defined(TGUI_SYSTEM_LINUX) && (SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR < 6) && defined(TGUI_USE_X11)
     #include <X11/Xlib.h>
@@ -72,7 +73,7 @@ namespace tgui
         if (m_guiResources[gui].window && m_mouseCursors[m_guiResources[gui].mouseCursor])
         {
 #if SFML_VERSION_MAJOR >= 3
-            auto cursor = sf::Cursor::createFromSystem(sf::Cursor::Type::Arrow);
+            auto cursor = sf::Cursor::loadFromSystem(sf::Cursor::Type::Arrow);
             if (cursor)
             {
                 m_guiResources[gui].window->setMouseCursor(*cursor);
@@ -100,7 +101,7 @@ namespace tgui
     {
         // Replace the cursor resource
 #if SFML_VERSION_MAJOR >= 3
-        auto newCursor = sf::Cursor::createFromPixels(pixels, size, hotspot);
+        auto newCursor = sf::Cursor::loadFromPixels(pixels, size, hotspot);
         if (newCursor)
             updateMouseCursor(type, std::make_unique<sf::Cursor>(std::move(*newCursor)));
 #else
@@ -187,14 +188,13 @@ namespace tgui
 
     void BackendSFML::setClipboard(const String& contents)
     {
-        sf::Clipboard::setString(sf::String(contents));
+        sf::Clipboard::setString(contents.toStdString());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     String BackendSFML::getClipboard() const
     {
-        return String(sf::Clipboard::getString());
+        return String(sf::Clipboard::getString().toAnsiString<std::string>());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,7 +320,7 @@ namespace tgui
         }
 
 #if SFML_VERSION_MAJOR >= 3
-        auto cursor = sf::Cursor::createFromSystem(typeSFML);
+        auto cursor = sf::Cursor::loadFromSystem(typeSFML);
         if (cursor)
             return std::make_unique<sf::Cursor>(std::move(*cursor));
         return nullptr;

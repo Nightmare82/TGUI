@@ -143,6 +143,9 @@ namespace tgui
 #endif
             }
         }
+
+        if (m_customView.has_value())
+            m_renderTexture->setView(m_customView.value());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,16 +153,14 @@ namespace tgui
     void CanvasSFML::setView(const sf::View& view)
     {
         m_customView = view;
+        m_renderTexture->setView(view);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const sf::View& CanvasSFML::getView() const
     {
-        static sf::View defaultView = getDefaultView();
-        defaultView = getDefaultView();
-
-        return m_customView ? *m_customView : defaultView;
+        return m_renderTexture->getView();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,6 +168,7 @@ namespace tgui
     void CanvasSFML::resetView()
     {
         m_customView.reset();
+        m_renderTexture->setView(getDefaultView());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,14 +176,14 @@ namespace tgui
     sf::View CanvasSFML::getDefaultView() const
     {
         // TODO : Is this correct ? (Was getDefaultView which doesn't exist anymore)
-        return m_renderTexture->computeView();
+        return m_renderTexture->getView();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     IntRect CanvasSFML::getViewport() const
     {
-        const sf::Rect2i rect = getView().computePixelViewport(m_renderTexture->getSize().toVec2f());
+        const sf::Rect2i rect = m_renderTexture->getViewport(m_renderTexture->getView());
 #if SFML_VERSION_MAJOR >= 3
         return {rect.position.x, rect.position.y, rect.size.x, rect.size.y};
 #else
@@ -194,7 +196,7 @@ namespace tgui
     Vector2f CanvasSFML::mapPixelToCoords(Vector2f point) const
     {
         const Vector2f size = getSize();
-        const sf::View& view = getView();
+        const sf::View& view = m_renderTexture->getView();
         const sf::Rect2f& viewport = view.viewport;
 
         const sf::Vec2f normalized = {
@@ -215,7 +217,7 @@ namespace tgui
     TGUI_NODISCARD Vector2f CanvasSFML::mapCoordsToPixel(Vector2f coord) const
     {
         const Vector2f size = getSize();
-        const sf::View& view = getView();
+        const sf::View& view = m_renderTexture->getView();
         const sf::Rect2f& viewport = view.viewport;
 
         const sf::Vec2f normalized = view.getTransform().transformPoint(coord);
@@ -255,9 +257,11 @@ namespace tgui
     {
         m_renderTexture->drawVertices(
             {
-                .vertexSpan = {vertices, vertexCount},
                 .primitiveType = type,
-            }, states
+                .renderStates = states,
+                .vertexCount = vertexCount,
+                .vertexData = vertices
+            }
         );
     }
 
@@ -307,9 +311,11 @@ namespace tgui
 
         m_renderTexture->drawVertices(
             {
-                .vertexSpan = {sfmlVertices, vertices.size()},
                 .primitiveType = sf::PrimitiveType::Triangles,
-            }, statesSFML
+                .renderStates = statesSFML,
+                .vertexCount = vertices.size(),
+                .vertexData = sfmlVertices
+            }
         );
     }
 
@@ -357,7 +363,7 @@ namespace tgui
         const sf::Color vertexColorSFML{vertexColor.red, vertexColor.green, vertexColor.blue, vertexColor.alpha};
         const std::array<sf::Vertex, 6> verticesSFML = {{
             {{0, 0}, vertexColorSFML, {0, 0}},
-            {{0, textureSize.y}, vertexColorSFML, {0, textureSize.y}},
+             {{0, textureSize.y}, vertexColorSFML, {0, textureSize.y}},
             {{textureSize.x, 0}, vertexColorSFML, {textureSize.x, 0}},
             {{textureSize.x, 0}, vertexColorSFML, {textureSize.x, 0}},
             {{0, textureSize.y}, vertexColorSFML, {0, textureSize.y}},
@@ -366,9 +372,11 @@ namespace tgui
 
         static_cast<BackendRenderTargetSFML&>(target).getTarget()->drawVertices(
             {
-                .vertexSpan = {verticesSFML.data(), verticesSFML.size()},
                 .primitiveType = sf::PrimitiveType::Triangles,
-            }, statesSFML
+                .renderStates = statesSFML,
+                .vertexCount = verticesSFML.size(),
+                .vertexData = verticesSFML.data()
+            }
             );
 
 #else

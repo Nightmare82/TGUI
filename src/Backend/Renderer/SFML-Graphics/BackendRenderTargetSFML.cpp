@@ -159,9 +159,11 @@ namespace tgui
 
         m_target->drawVertices(
             {
-                .vertexSpan = {sfmlVertices, vertices.size()},
+                .vertexCount = vertices.size(),
+                .vertexData = sfmlVertices,
                 .primitiveType = sf::PrimitiveType::Triangles,
-            }, sfStates
+                .renderStates = sfStates,
+            }
         );
 
         if (clippingRequired)
@@ -177,10 +179,7 @@ namespace tgui
         // we will create an array of our own Vertex objects and then use a reinterpret_cast to turn them into sf::Vertex.
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");
 
-#if SFML_VERSION_MAJOR < 3
-        const Vector2f textureSize = texture ? Vector2f{texture->getSize()} : Vector2f{1,1};
-#endif
-        const Vector2f textureSize = texture ? Vector2f{texture->getSize()} : Vector2f{1,1};
+        const Vector2f textureSize = texture ? Vector2f{ texture->getSize() } : Vector2f{ 1,1 };
 
         if (indices)
         {
@@ -205,9 +204,11 @@ namespace tgui
 
             m_target->drawVertices(
                 {
-                    .vertexSpan = {reinterpret_cast<const sf::Vertex*>(verticesSFML.data()), verticesSFML.size()},
                     .primitiveType = sf::PrimitiveType::Triangles,
-                },convertRenderStates(states, texture)
+                    .vertexCount = verticesSFML.size(),
+                    .vertexData = reinterpret_cast<const sf::Vertex*>(verticesSFML.data()),
+                    .renderStates = convertRenderStates(states, texture)
+                }
                 );
         }
         else // There are no indices
@@ -215,9 +216,11 @@ namespace tgui
 #if SFML_VERSION_MAJOR >= 3
             m_target->drawVertices(
                 {
-                    .vertexSpan = {reinterpret_cast<const sf::Vertex*>(vertices), vertexCount},
                     .primitiveType = sf::PrimitiveType::Triangles,
-                },convertRenderStates(states, texture)
+                    .vertexCount = vertexCount,
+                    .vertexData = reinterpret_cast<const sf::Vertex*>(vertices),
+                    .renderStates = convertRenderStates(states, texture)
+                }
             );
 #else
             auto verticesSFML = std::vector<Vertex>(vertices, vertices + vertexCount);
@@ -245,8 +248,7 @@ namespace tgui
                               {std::round(clipRect.width * m_pixelsPerPoint.x) / m_pixelsPerPoint.x, std::round(clipRect.height * m_pixelsPerPoint.y) / m_pixelsPerPoint.y}};
             newView.viewport = {{clipViewport.left / m_targetSize.x, clipViewport.top / m_targetSize.y},
                                  {clipViewport.width / m_targetSize.x, clipViewport.height / m_targetSize.y}};
-
-            // m_target->setView(newView);
+            m_target->setView(newView);
         }
         else // Clip the entire window
         {
@@ -254,8 +256,7 @@ namespace tgui
 
             sf::View clippingView{{0, 0}, {0, 0}};
             clippingView.viewport = {{0, 0}, {0, 0}};
-
-            // m_target->setView(clippingView);
+            m_target->setView(clippingView);
         }
     }
 
@@ -265,7 +266,7 @@ namespace tgui
     {
         const std::array<float, 16>& transformMatrix = states.transform.getMatrix();
 
-        sf::RenderStates statesSFML{};
+        sf::RenderStates statesSFML;
         statesSFML.transform = sf::Transform{
                 transformMatrix[0], transformMatrix[4], transformMatrix[12],
                 transformMatrix[1], transformMatrix[5], transformMatrix[13]

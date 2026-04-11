@@ -71,7 +71,7 @@ namespace tgui
         BackendWindowSFML(unsigned int width, unsigned int height, const String& title)
         {
             sf::RenderWindow::Settings settings{ .size = {width, height}, .title = title, .fullscreen = false, .resizable = true };
-
+            
 #if !TGUI_HAS_BACKEND_SFML_GRAPHICS
             settings.majorVersion = 3;
             settings.minorVersion = 3;
@@ -155,7 +155,7 @@ namespace tgui
             auto pixelPtr = ImageLoader::loadFromFile((getResourcePath() / filename).asString(), iconSize);
             if (pixelPtr)
 #if SFML_VERSION_MAJOR >= 3
-                m_window->setIcon(pixelPtr.get(), {iconSize.x, iconSize.y} );
+                m_window->setIcon({iconSize.x, iconSize.y}, pixelPtr.get());
 #else
                 m_window->setIcon(iconSize.x, iconSize.y, pixelPtr.get());
 #endif

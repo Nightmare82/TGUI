@@ -205,9 +205,7 @@ namespace tgui
     float BackendFontSFML::getDescent(unsigned int characterSize)
     {
 #if (SFML_VERSION_MAJOR > 3) || (SFML_VERSION_MAJOR == 3 && SFML_VERSION_MINOR >= 1)
-        const FontGlyph& glyphG = getGlyph(U'g', characterSize, false);
-        const FontGlyph& glyphUnderscore = getGlyph(U'_', characterSize, false);
-        return std::min(-glyphG.bounds.height - glyphG.bounds.top, -glyphUnderscore.bounds.height - glyphUnderscore.bounds.top);
+        return std::ceil(m_font->getDescent(characterSize));
 #else
         // SFML didn't provide a method to access the descent of the font prior to SFML 3.1.
         // We extract the descent by examining the 'g' and '_' glyphs, assuming it exists.

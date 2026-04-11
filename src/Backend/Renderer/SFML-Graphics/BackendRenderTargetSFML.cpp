@@ -148,7 +148,7 @@ namespace tgui
 
         m_target->drawVertices(
             {
-                .vertexCount = vertices.size(),
+                .vertexCount = indices.size(),
                 .vertexData = sfmlVertices,
                 .primitiveType = sf::PrimitiveType::Triangles,
                 .renderStates = sfStates,

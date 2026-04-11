@@ -121,9 +121,7 @@ namespace tgui
         sfStates.texture = std::static_pointer_cast<BackendTextureSFML>(sprite.getTexture().getData()->backendTexture)->getInternalTexture();
         sfStates.shader = sprite.getTexture().getShader();
 
-#if SFML_VERSION_MAJOR < 3
         const Vector2f textureSize = texture ? Vector2f{texture->getSize()} : Vector2f{1,1};
-#endif
         const std::vector<Vertex>& vertices = sprite.getVertices();
         const std::vector<unsigned int>& indices = sprite.getIndices();
         auto triangleVertices = MakeUniqueForOverwrite<Vertex[]>(indices.size());
@@ -131,6 +129,8 @@ namespace tgui
         {
 #if SFML_VERSION_MAJOR >= 3
             triangleVertices[i] = vertices[indices[i]];
+            triangleVertices[i].texCoords.x = vertices[indices[i]].texCoords.x * textureSize.x;
+            triangleVertices[i].texCoords.y = vertices[indices[i]].texCoords.y * textureSize.y;
 #else
             triangleVertices[i].position.x = vertices[indices[i]].position.x;
             triangleVertices[i].position.y = vertices[indices[i]].position.y;

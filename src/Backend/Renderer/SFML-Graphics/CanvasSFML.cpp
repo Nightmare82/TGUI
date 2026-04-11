@@ -363,11 +363,11 @@ namespace tgui
         const sf::Color vertexColorSFML{vertexColor.red, vertexColor.green, vertexColor.blue, vertexColor.alpha};
         const std::array<sf::Vertex, 6> verticesSFML = {{
             {{0, 0}, vertexColorSFML, {0, 0}},
-            {{0, textureSize.y}, vertexColorSFML, {0, 1}},
-            {{textureSize.x, 0}, vertexColorSFML, {1, 0}},
-            {{textureSize.x, 0}, vertexColorSFML, {1, 0}},
-            {{0, textureSize.y}, vertexColorSFML, {0, 1}},
-            {{textureSize.x, textureSize.y}, vertexColorSFML, {1, 1}},
+             {{0, textureSize.y}, vertexColorSFML, {0, textureSize.y}},
+            {{textureSize.x, 0}, vertexColorSFML, {textureSize.x, 0}},
+            {{textureSize.x, 0}, vertexColorSFML, {textureSize.x, 0}},
+            {{0, textureSize.y}, vertexColorSFML, {0, textureSize.y}},
+            {{textureSize.x, textureSize.y}, vertexColorSFML, {textureSize.x, textureSize.y}},
         }};
 
         static_cast<BackendRenderTargetSFML&>(target).getTarget()->drawVertices(

@@ -168,9 +168,7 @@ namespace tgui
         // we will create an array of our own Vertex objects and then use a reinterpret_cast to turn them into sf::Vertex.
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");
 
-#if SFML_VERSION_MAJOR < 3
-        const Vector2f textureSize = texture ? Vector2f{texture->getSize()} : Vector2f{1,1};
-#endif
+        const Vector2f textureSize = texture ? Vector2f{ texture->getSize() } : Vector2f{ 1,1 };
 
         if (indices)
         {
@@ -179,6 +177,9 @@ namespace tgui
             {
 #if SFML_VERSION_MAJOR >= 3
                 verticesSFML[i] = vertices[indices[i]];
+                
+                verticesSFML[i].texCoords.x *= textureSize.x;
+                verticesSFML[i].texCoords.y *= textureSize.y;
 #else
                 verticesSFML[i].position.x = vertices[indices[i]].position.x;
                 verticesSFML[i].position.y = vertices[indices[i]].position.y;

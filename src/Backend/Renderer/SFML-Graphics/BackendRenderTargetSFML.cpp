@@ -30,6 +30,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Graphics/VertexBuffer.hpp>
+#include <SFML/Graphics/RectangleShapeData.hpp>
 
 #include <cmath>
 #include <array>
@@ -74,22 +75,32 @@ namespace tgui
             return;
 
         // Change the view
-        const sf::View oldView = m_target->getView();
+        // const sf::View oldView = m_target->getView();
         updateClipping(m_viewRect, m_viewport);
 
         // Draw the widgets
-        root->draw(*this, {});
+        root->draw(*this, {}); // TODO: pass clipping view
 
         // Restore the old view
-        m_target->setView(oldView);
+        // m_target->setView(oldView);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void BackendRenderTargetSFML::drawSprite(const RenderStates& states, const Sprite& sprite)
     {
+
+
         if (!sprite.isSet())
             return;
+
+            m_target->draw(
+            sf::RectangleShapeData{
+                .position = sprite.getPosition(),
+                .fillColor = {255, 0, 255, 255},
+                .size = sprite.getSize(),
+            }
+        );
 
         // We can use the drawVertexArray function (called from the base class) if the sprite doesn't have a shader
         if (sprite.getTexture().getData()->svgImage || !sprite.getTexture().getShader())
@@ -177,9 +188,8 @@ namespace tgui
             {
 #if SFML_VERSION_MAJOR >= 3
                 verticesSFML[i] = vertices[indices[i]];
-                
-                verticesSFML[i].texCoords.x *= textureSize.x;
-                verticesSFML[i].texCoords.y *= textureSize.y;
+                verticesSFML[i].texCoords.x = vertices[indices[i]].texCoords.x * textureSize.x;
+                verticesSFML[i].texCoords.y = vertices[indices[i]].texCoords.y * textureSize.y;
 #else
                 verticesSFML[i].position.x = vertices[indices[i]].position.x;
                 verticesSFML[i].position.y = vertices[indices[i]].position.y;

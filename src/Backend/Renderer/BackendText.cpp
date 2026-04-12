@@ -428,6 +428,7 @@ namespace tgui
 
         m_size = {maxX + m_outlineThickness, height + (2 * m_outlineThickness)};
 
+#if 0
         // Normalize the texture coordinates
         const Vector2u textureSize = m_font->getTextureSize(m_characterSize);
         if ((textureSize.x > 0) && (textureSize.y > 0))
@@ -449,6 +450,7 @@ namespace tgui
                 }
             }
         }
+#endif
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

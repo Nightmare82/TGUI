@@ -204,11 +204,18 @@ namespace tgui
         else // There are no indices
         {
 #if SFML_VERSION_MAJOR >= 3
+            auto verticesSFML = std::vector<Vertex>(vertices, vertices + vertexCount);
+            for (std::size_t i = 0; i < vertexCount; ++i)
+            {
+                verticesSFML[i].texCoords.x *= textureSize.x;
+                verticesSFML[i].texCoords.y *= textureSize.y;
+            }
+
             m_target->drawVertices(
                 {
                     .primitiveType = sf::PrimitiveType::Triangles,
                     .vertexCount = vertexCount,
-                    .vertexData = reinterpret_cast<const sf::Vertex*>(vertices),
+                    .vertexData = reinterpret_cast<const sf::Vertex*>(verticesSFML.data()),
                     .renderStates = convertRenderStates(states, texture)
                 }
             );

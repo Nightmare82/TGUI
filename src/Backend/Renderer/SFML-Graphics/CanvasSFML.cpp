@@ -291,8 +291,9 @@ namespace tgui
 #if SFML_VERSION_MAJOR >= 3
         //statesSFML.coordinateType = sf::CoordinateType::Normaliz3ed;
 #else
-        const sf::Vector2u textureSize{statesSFML.texture->getSize()};
+        
 #endif
+        const sf::Vec2u textureSize{ statesSFML.texture->getSize() };
 
         const std::vector<Vertex>& vertices = sprite.getVertices();
         const std::vector<unsigned int>& indices = sprite.getIndices();
@@ -300,10 +301,10 @@ namespace tgui
         for (std::size_t i = 0; i < indices.size(); ++i)
         {
             triangleVertices[i] = vertices[indices[i]];
-#if SFML_VERSION_MAJOR < 3
+//#if SFML_VERSION_MAJOR < 3
             triangleVertices[i].texCoords.x *= textureSize.x;
             triangleVertices[i].texCoords.y *= textureSize.y;
-#endif
+//#endif
         }
 
         static_assert(sizeof(Vertex) == sizeof(sf::Vertex), "Size of sf::Vertex has to match with tgui::Vertex for optimization to work");

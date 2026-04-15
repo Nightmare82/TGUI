@@ -129,8 +129,8 @@ namespace tgui
         {
 #if SFML_VERSION_MAJOR >= 3
             triangleVertices[i] = vertices[indices[i]];
-            triangleVertices[i].texCoords.x = vertices[indices[i]].texCoords.x * textureSize.x;
-            triangleVertices[i].texCoords.y = vertices[indices[i]].texCoords.y * textureSize.y;
+            triangleVertices[i].texCoords.x *= textureSize.x;
+            triangleVertices[i].texCoords.y *= textureSize.y;
 #else
             triangleVertices[i].position.x = vertices[indices[i]].position.x;
             triangleVertices[i].position.y = vertices[indices[i]].position.y;

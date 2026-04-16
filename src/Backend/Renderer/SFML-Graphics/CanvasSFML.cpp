@@ -49,12 +49,10 @@ namespace tgui
     CanvasSFML::CanvasSFML(const CanvasSFML& other) :
         CanvasBase  {other},
         m_customView{other.m_customView}
-        // TODO : Fix this
-        //m_renderTexture(other.m_renderTexture)
     {
         if (other.m_renderTexture)
         {
-            m_renderTexture = sf::RenderTexture::create(other.m_renderTexture->getSize()).value();
+            m_renderTexture = sf::RenderTexture::create(other.m_renderTexture->getSize());
         }
         setSize(other.getSize());
     }
@@ -137,7 +135,7 @@ namespace tgui
             if (!m_renderTexture || (m_renderTexture->getSize().x != newTextureSize.x) || (m_renderTexture->getSize().y != newTextureSize.y))
             {
 #if SFML_VERSION_MAJOR >= 3
-                m_renderTexture = std::move(sf::RenderTexture::create(newTextureSize).value());
+                m_renderTexture = sf::RenderTexture::create(newTextureSize);
 #else
                 m_renderTexture.create(newTextureSize.x, newTextureSize.y);
 #endif
@@ -275,13 +273,12 @@ namespace tgui
 
         sf::RenderStates statesSFML;
         const std::array<float, 16>& transformMatrix = states.transform.getMatrix();
-        // TODO : This is most possibly wrong
+
         statesSFML.transform = sf::Transform(
             transformMatrix[0], transformMatrix[4], transformMatrix[12],
             transformMatrix[1], transformMatrix[5], transformMatrix[13]
     );
-
-        // transformMatrix[3], transformMatrix[7], transformMatrix[15]);
+        
         statesSFML.transform.translate({sprite.getPosition().x, sprite.getPosition().y});
 
         TGUI_ASSERT(std::dynamic_pointer_cast<BackendTextureSFML>(sprite.getTexture().getData()->backendTexture),
@@ -349,12 +346,10 @@ namespace tgui
 
         sf::RenderStates statesSFML;
         statesSFML.texture = &texture;
-        // TODO : This is most possibly wrong
         statesSFML.transform = sf::Transform(
             transformMatrix[0], transformMatrix[4], transformMatrix[12],
             transformMatrix[1], transformMatrix[5], transformMatrix[13]
     );
-            //transformMatrix[3], transformMatrix[7], transformMatrix[15]);
 
 #if SFML_VERSION_MAJOR >= 3
         //statesSFML.coordinateType = sf::CoordinateType::Normalized;

@@ -298,7 +298,7 @@ namespace tgui
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     protected:
 
-        Optional<sf::RenderTexture> m_renderTexture;
+        sf::base::Optional<sf::RenderTexture> m_renderTexture;
         Optional<sf::View> m_customView;
     };
 }

@@ -269,8 +269,6 @@ namespace tgui
                 transformMatrix[1], transformMatrix[5], transformMatrix[13]
             };
 
-
-
 #if SFML_VERSION_MAJOR >= 3
         //statesSFML.coordinateType = sf::CoordinateType::Normalized;
 #endif

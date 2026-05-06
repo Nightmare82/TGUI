@@ -148,8 +148,8 @@ namespace tgui
 
         m_target->drawVertices(
             {
-                .vertexCount = indices.size(),
                 .vertexData = sfmlVertices,
+                .vertexCount = indices.size(),
                 .primitiveType = sf::PrimitiveType::Triangles,
                 .renderStates = sfStates,
             }
@@ -194,9 +194,9 @@ namespace tgui
 
             m_target->drawVertices(
                 {
-                    .primitiveType = sf::PrimitiveType::Triangles,
-                    .vertexCount = verticesSFML.size(),
                     .vertexData = reinterpret_cast<const sf::Vertex*>(verticesSFML.data()),
+                    .vertexCount = verticesSFML.size(),
+                    .primitiveType = sf::PrimitiveType::Triangles,
                     .renderStates = convertRenderStates(states, texture)
                 }
                 );
@@ -213,9 +213,9 @@ namespace tgui
 
             m_target->drawVertices(
                 {
-                    .primitiveType = sf::PrimitiveType::Triangles,
-                    .vertexCount = vertexCount,
                     .vertexData = reinterpret_cast<const sf::Vertex*>(verticesSFML.data()),
+                    .vertexCount = vertexCount,
+                    .primitiveType = sf::PrimitiveType::Triangles,
                     .renderStates = convertRenderStates(states, texture)
                 }
             );

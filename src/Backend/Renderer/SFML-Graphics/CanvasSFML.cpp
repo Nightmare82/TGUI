@@ -255,10 +255,10 @@ namespace tgui
     {
         m_renderTexture->drawVertices(
             {
-                .primitiveType = type,
-                .renderStates = states,
+                .vertexData = vertices,
                 .vertexCount = vertexCount,
-                .vertexData = vertices
+                .primitiveType = type,
+                .renderStates = states
             }
         );
     }
@@ -309,10 +309,10 @@ namespace tgui
 
         m_renderTexture->drawVertices(
             {
-                .primitiveType = sf::PrimitiveType::Triangles,
-                .renderStates = statesSFML,
+                .vertexData = sfmlVertices,
                 .vertexCount = vertices.size(),
-                .vertexData = sfmlVertices
+                .primitiveType = sf::PrimitiveType::Triangles,
+                .renderStates = statesSFML
             }
         );
     }
@@ -368,10 +368,10 @@ namespace tgui
 
         static_cast<BackendRenderTargetSFML&>(target).getTarget()->drawVertices(
             {
-                .primitiveType = sf::PrimitiveType::Triangles,
-                .renderStates = statesSFML,
-                .vertexCount = verticesSFML.size(),
-                .vertexData = verticesSFML.data()
+            .vertexData = verticesSFML.data(),
+            .vertexCount = verticesSFML.size(),
+            .primitiveType = sf::PrimitiveType::Triangles,
+            .renderStates = statesSFML,
             }
             );
 
